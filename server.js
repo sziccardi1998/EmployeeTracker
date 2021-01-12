@@ -24,8 +24,20 @@ function optionTree() {
     }]).then((data) => {
         const userChoice = data.selection;
         // build a case-switch tree that performs a different task for each choice
-        case(userChoice) {
-
+        // each case should have a function that is used
+        switch (userChoice) {
+            case 'View all employees':
+                break;
+            case 'View department':
+                break;
+            case 'View role':
+                break;
+            case 'Add department':
+                break;
+            case 'Add role':
+                break;
+            case 'Add employee':
+                break;
         }
     })
 }
