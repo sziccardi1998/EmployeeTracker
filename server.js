@@ -4,6 +4,7 @@ const inquirer = require("inquirer");
 // import other functions
 const addDepartment = require('./lib/addDepartment');
 const addEmployee = require('./lib/addEmployee');
+const addRole = require('./lib/addRole');
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -41,6 +42,7 @@ function optionTree() {
                 addDepartment();
                 break;
             case 'Add role':
+                addRole();
                 break;
             case 'Add employee':
                 addEmployee();
