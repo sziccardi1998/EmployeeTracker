@@ -20,7 +20,7 @@ function optionTree() {
         type: 'list',
         message: 'What would you like to do?',
         name: 'selection',
-        choices: ['View all employees', 'View department', 'View role', 'Add department', 'Add role', 'Add employee'],
+        choices: ['View all employees', 'View department', 'View role', 'Add department', 'Add role', 'Add employee', 'Exit'],
     }]).then((data) => {
         const userChoice = data.selection;
         // build a case-switch tree that performs a different task for each choice
@@ -38,6 +38,9 @@ function optionTree() {
                 break;
             case 'Add employee':
                 break;
+            case 'Exit':
+                break;
         }
     })
 }
+
