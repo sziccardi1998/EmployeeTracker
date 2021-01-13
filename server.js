@@ -5,6 +5,7 @@ const inquirer = require("inquirer");
 const addDepartment = require('./lib/addDepartment');
 const addEmployee = require('./lib/addEmployee');
 const addRole = require('./lib/addRole');
+const viewDepartments = require('./lib/viewDepartments');
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -34,7 +35,8 @@ function optionTree() {
         switch (userChoice) {
             case 'View all employees':
                 break;
-            case 'View department':
+            case 'View all departments':
+                viewDepartments();
                 break;
             case 'View role':
                 break;
