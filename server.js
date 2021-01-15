@@ -19,8 +19,6 @@ const connection = mysql.createConnection({
 connection.connect(err => {
     if (err) throw err;
     console.log("Conencted as id" + connection.threadId);
-    // insert function that starts the cli
-    optionTree();
 });
 
 function optionTree() {
@@ -31,6 +29,14 @@ function optionTree() {
         choices: ['View all employees', 'View all departments', 'View roles', 'Add department', 'Add role', 'Add employee', 'Exit'],
     }]).then((data) => {
         let userChoice = data.selection;
+
+        let departmentArray = [];
+        connection.query("SELECT * FROM department", function(err, res) {
+            if (err) throw err;
+            for(let i = 0; i < res.length; i++){
+                departmentArray.push(res[i].name);
+            }
+        })
         // build a case-switch tree that performs a different task for each choice
         // each case should have a function that is used
         switch (userChoice) {
@@ -38,7 +44,7 @@ function optionTree() {
                 viewAllEmployees();
                 break;
             case 'View all departments':
-                viewDepartments();
+                viewDepartments(departmentArray);
                 break;
             case 'View roles':
                 viewRoles();
@@ -47,7 +53,7 @@ function optionTree() {
                 addDepartment();
                 break;
             case 'Add role':
-                addRole();
+                addRole(departmentArray);
                 break;
             case 'Add employee':
                 addEmployee();
@@ -81,17 +87,15 @@ const addDepartment = () => {
                 function(err, res) {
                     if (err) throw err;
                     console.log("\nDepartment created!\n");
+                    optionTree();
+
                 }
             );
-            // return back to the main menu
-            optionTree();
         })
 }
 
 // create a function that adds a new role to the roles database
-const addRole = () => {
-    connection.query("SELECT * FROM department", function (err, res) {
-        if (err) throw err;
+const addRole = (deptArray) => {
         inquirer.prompt([
                 {
                      type: 'input',
@@ -107,67 +111,34 @@ const addRole = () => {
                      type: 'list',
                      message: 'Which department does this role belong to?',
                      name: 'roleDepartment',
-                     choices: function () {
-                         let deptArray = res.map(choice => choice.name);
-                         return deptArray
-                     }
+                     choices: deptArray
                 }
             ]).then((data) => {
-        let depID = connection.query(
-        "SELECT FROM department WHERE ?",
+        connection.query(
+        "SELECT * FROM department WHERE ?",
         {
             name: data.roleDepartment
         },
         function(err, res) {
             if (err) throw err;
-            return res.id;
-        }
-    )
+            console.log(res[0].id);
+            secondQuery(data.roleTitle, data.roleSalary, res[0].id);
+            optionTree();
+        })
+    })
+}
+
+function secondQuery(job, pay, departmentID) {
     connection.query(
         "INSERT INTO role SET ?", {
-            title: data.roleTitle,
-            salary: data.roleSalary,
-            department_id: depID
+            title: job,
+            salary: pay,
+            department_id: departmentID
         },
         function(err, res) {
             if (err) throw err;
             console.log("\nRole added!\n");
         }
     )
-    })    
-    })
-    optionTree();
 }
-    //     // BONUS: check to see if the role already exsists
-    //     // if the role does not already exsist add it to the roles table
-
-    //     // get the id of the department that is selected
-    //     let depID = connection.query(
-    //         "SELECT FROM department WHERE ?",
-    //         {
-    //             name: data.roleDepartment
-    //         },
-    //         function(err, res) {
-    //             if (err) throw err;
-    //             return res.id
-    //         }
-    //     );
-
-    //     console.log(depID);
-    //     // insert the new role into the table
-    //     connection.query(
-    //         "INSERT INTO role SET?",
-    //         {
-    //             title: data.roleTitle,
-    //             salary: data.roleSalary,
-    //             department_id: depID
-    //         },
-    //         function(err, res) {
-    //             if (err) throw err;
-    //             console.log("\nRole added!\n")
-    //         }
-    //     );
-        
-    //     // return back to the main menu
-    //     optionTree();
-    // });
+optionTree();
