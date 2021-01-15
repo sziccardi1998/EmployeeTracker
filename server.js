@@ -3,7 +3,7 @@ const inquirer = require("inquirer");
 
 // import other functions
 const addEmployee = require('./lib/addEmployee');
-const addRole = require('./lib/addRole');
+//const addRole = require('./lib/addRole');
 const viewDepartments = require('./lib/viewDepartments');
 const viewAllEmployees = require('./lib/viewAllEmployees');
 const viewRoles = require('./lib/viewRoles');
@@ -59,6 +59,8 @@ function optionTree() {
 }
 
 // Begining of functions
+
+// create function that adds a new department to the department table
 const addDepartment = () => {
     // prompt for the department name
     inquirer.prompt([
@@ -78,10 +80,94 @@ const addDepartment = () => {
                 },
                 function(err, res) {
                     if (err) throw err;
-                    console.log("Department created!\n");
+                    console.log("\nDepartment created!\n");
                 }
             );
             // return back to the main menu
             optionTree();
         })
 }
+
+// create a function that adds a new role to the roles database
+const addRole = () => {
+    connection.query("SELECT * FROM department", function (err, res) {
+        if (err) throw err;
+        inquirer.prompt([
+                {
+                     type: 'input',
+                     message: 'What is the title of the role?',
+                     name: 'roleTitle'
+                },
+                {
+                     type: 'number',
+                     message: 'What is the salary of this role?',
+                     name: 'roleSalary'
+                },
+                {
+                     type: 'list',
+                     message: 'Which department does this role belong to?',
+                     name: 'roleDepartment',
+                     choices: function () {
+                         let deptArray = res.map(choice => choice.name);
+                         return deptArray
+                     }
+                }
+            ]).then((data) => {
+        let depID = connection.query(
+        "SELECT FROM department WHERE ?",
+        {
+            name: data.roleDepartment
+        },
+        function(err, res) {
+            if (err) throw err;
+            return res.id;
+        }
+    )
+    connection.query(
+        "INSERT INTO role SET ?", {
+            title: data.roleTitle,
+            salary: data.roleSalary,
+            department_id: depID
+        },
+        function(err, res) {
+            if (err) throw err;
+            console.log("\nRole added!\n");
+        }
+    )
+    })    
+    })
+    optionTree();
+}
+    //     // BONUS: check to see if the role already exsists
+    //     // if the role does not already exsist add it to the roles table
+
+    //     // get the id of the department that is selected
+    //     let depID = connection.query(
+    //         "SELECT FROM department WHERE ?",
+    //         {
+    //             name: data.roleDepartment
+    //         },
+    //         function(err, res) {
+    //             if (err) throw err;
+    //             return res.id
+    //         }
+    //     );
+
+    //     console.log(depID);
+    //     // insert the new role into the table
+    //     connection.query(
+    //         "INSERT INTO role SET?",
+    //         {
+    //             title: data.roleTitle,
+    //             salary: data.roleSalary,
+    //             department_id: depID
+    //         },
+    //         function(err, res) {
+    //             if (err) throw err;
+    //             console.log("\nRole added!\n")
+    //         }
+    //     );
+        
+    //     // return back to the main menu
+    //     optionTree();
+    // });
