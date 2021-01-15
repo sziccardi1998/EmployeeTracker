@@ -2,7 +2,6 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 
 // import other functions
-const addDepartment = require('./lib/addDepartment');
 const addEmployee = require('./lib/addEmployee');
 const addRole = require('./lib/addRole');
 const viewDepartments = require('./lib/viewDepartments');
@@ -13,7 +12,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
     user: 'root',
-    password: "", // figure out how to hide this later
+    password: "Jag!ax22", // figure out how to hide this later
     database: "employeeTracker_DB" //whatever we name this thing later
 });
 
@@ -57,4 +56,32 @@ function optionTree() {
                 break;
         }
     })
+}
+
+// Begining of functions
+const addDepartment = () => {
+    // prompt for the department name
+    inquirer.prompt([
+        {
+            type: 'input',
+            message: 'What is the department name?',
+            name: 'department'   
+        }
+    ]).then((data) => {
+            // BONUS: check to see if that department already exsists
+            var departmentName = data.department;
+            // if the department does not exsist add it to the table
+            connection.query(
+                "INSERT INTO department SET ?",
+                {
+                    name: departmentName
+                },
+                function(err, res) {
+                    if (err) throw err;
+                    console.log("Department created!\n");
+                }
+            );
+            // return back to the main menu
+            optionTree();
+        })
 }
