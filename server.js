@@ -2,7 +2,6 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 
 // import other functions
-const addEmployee = require('./lib/addEmployee');
 const viewDepartments = require('./lib/viewDepartments');
 const viewAllEmployees = require('./lib/viewAllEmployees');
 const viewRoles = require('./lib/viewRoles');
@@ -43,7 +42,7 @@ function optionTree() {
         connection.query("SELECT * FROM employee", function(err, res) {
             if (err) throw err;
             for(let i = 0; i < res.length; i++) {
-                managerArray.push(res[i].first_name + res[i].last_name);
+                managerArray.push(res[i].first_name + " " + res[i].last_name);
             }
         })
 
@@ -193,49 +192,40 @@ const addEmployee = (roleList, managerList) => {
     }
 ]).then((data) => {
     // get the id of the manager and role
+    let employeeFirst = data.firstName;
+    let employeeLast = data.lastName;
     let roleID;
-    let managerID;
     if (data.employeeManager === "None") {
-        roleID = connection.query(
+        connection.query(
             "SELECT * FROM role WHERE ?",
             {
                 title: data.employeeRole
             },
             function(err, res) {
                 if (err) throw err;
-                return res[0].id;
+                roleID = res[0].id;
+                employeeNoManager(data.firstName, data.lastName, roleID);                
             }
         )
-        employeeNoManager(data.firstName, data.lastName, roleID);
     }
     else {
-        roleID = connection.query(
-            "SELECT * FROM role WHERE ?",
-            {
-                title: data.employeeRole
-            },
-            function(err, res) {
-                if (err) throw err;
-                return res[0].id;
-            }
-        )
         let splitName = data.employeeManager.split(" ");
         let managerFirstName = splitName[0];
         let managerLastName = splitName[1];
-        managerID = connection.query(
-            "SELECT * FROM employee WHERE ?",
+        console.log(managerFirstName);
+        connection.query(
+            "SELECT * FROM role WHERE ?",
             {
-                first_name: managerFirstName,
-                last_name: managerLastName,
+                title: data.employeeRole
             },
             function(err, res) {
                 if (err) throw err;
-                return res[0].id;
+                roleID = res[0].id;
+                getManagerID(managerFirstName, managerLastName, roleID, employeeFirst, employeeLast);
             }
         )
-            employeeWithManager(data.firstName, data.lastName, roleID, managerID);
+        
     }
-    optionTree();
 })
 
 } 
@@ -252,8 +242,28 @@ const employeeNoManager = (first, last, role) => {
         function(err, res) {
             if (err) throw err;
             console.log("\nEmployee added!\n");
+            optionTree();
         }
     );
+}
+
+const getManagerID = (first, last, roleID, empFirst, empLast) => {
+    let passedFirst = empFirst;
+    let passedLast = empLast;
+    connection.query(
+        "SELECT * FROM employee WHERE ? AND ?",
+        [{
+            first_name: first
+        },{
+            last_name: last
+        }],
+        function(err, res) {
+            if (err) throw err;
+            managerID = res[0].id;
+            console.log(managerID);
+            employeeWithManager(passedFirst, passedLast, roleID, managerID);
+        }
+    )
 }
 
 // create function to add an employee with a manager
@@ -269,6 +279,7 @@ const employeeWithManager = (first, last, role, manager) => {
         function(err, res) {
             if (err) throw err;
             console.log("\nEmployee added!\n");
+            optionTree();
         }
     );
 }
