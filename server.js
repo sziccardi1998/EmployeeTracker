@@ -2,9 +2,6 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 
 // import other functions
-const viewDepartments = require('./lib/viewDepartments');
-const viewAllEmployees = require('./lib/viewAllEmployees');
-const viewRoles = require('./lib/viewRoles');
 
 const connection = mysql.createConnection({
     host: 'localhost',
@@ -24,7 +21,7 @@ function optionTree() {
         type: 'list',
         message: 'What would you like to do?',
         name: 'selection',
-        choices: ['View all employees', 'View all departments', 'View roles', 'Add department', 'Add role', 'Add employee', 'Exit'],
+        choices: ['View all employees', 'View employees by department', 'View roles', 'Add department', 'Add role', 'Add employee', 'Exit'],
     }]).then((data) => {
         let userChoice = data.selection;
 
@@ -61,8 +58,8 @@ function optionTree() {
             case 'View all employees':
                 viewAllEmployees();
                 break;
-            case 'View all departments':
-                viewDepartments(departmentArray);
+            case 'View employees by department':
+                viewDepartments();
                 break;
             case 'View roles':
                 viewRoles();
@@ -282,6 +279,17 @@ const employeeWithManager = (first, last, role, manager) => {
             optionTree();
         }
     );
+}
+
+// create function that displays employees by department
+const viewDepartments = () => {
+    // get the name and department of each employee
+    connection.query("SELECT employee.first_name, employee.last_name, department.name AS Department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id", 
+    function (err, res) {
+        if(err) throw err;
+        console.table(res);
+        optionTree();
+    })
 }
 
 optionTree();
