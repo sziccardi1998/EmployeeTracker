@@ -289,7 +289,7 @@ const viewDepartments = () => {
         if(err) throw err;
         console.table(res);
         optionTree();
-    })
+    });
 }
 
 // create function that displays employees by role
@@ -300,7 +300,18 @@ const viewRoles = () => {
         if (err) throw err;
         console.table(res);
         optionTree();
-    })
+    });
+}
+
+// create function that shows all information for each employee
+const viewAllEmployees = () => {
+    // get id, name, title, department, salary, manager
+    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(manager.first_name, ' ', manager.last_name) AS Manager FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id LEFT JOIN employee manager on employee.manager_id = manager.id;",
+    function(err, res) {
+        if (err) throw err;
+        console.table(res);
+        optionTree();
+    });
 }
 
 optionTree();
