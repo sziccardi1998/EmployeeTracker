@@ -21,7 +21,7 @@ function optionTree() {
         type: 'list',
         message: 'What would you like to do?',
         name: 'selection',
-        choices: ['View all employees', 'View employees by department', 'View roles', 'Add department', 'Add role', 'Add employee', 'Exit'],
+        choices: ['View all employees', 'View employees by department', 'View employees by role', 'Add department', 'Add role', 'Add employee', 'Exit'],
     }]).then((data) => {
         let userChoice = data.selection;
 
@@ -61,7 +61,7 @@ function optionTree() {
             case 'View employees by department':
                 viewDepartments();
                 break;
-            case 'View roles':
+            case 'View employees by role':
                 viewRoles();
                 break;
             case 'Add department':
@@ -287,6 +287,17 @@ const viewDepartments = () => {
     connection.query("SELECT employee.first_name, employee.last_name, department.name AS Department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id", 
     function (err, res) {
         if(err) throw err;
+        console.table(res);
+        optionTree();
+    })
+}
+
+// create function that displays employees by role
+const viewRoles = () => {
+    // get the name and role of each employee
+    connection.query("SELECT employee.first_name, employee.last_name, role.title AS Title FROM employee JOIN role ON employee.role_id = role.id",
+    function (err, res) {
+        if (err) throw err;
         console.table(res);
         optionTree();
     })
