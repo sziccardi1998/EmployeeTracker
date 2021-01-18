@@ -21,7 +21,7 @@ function optionTree() {
         type: 'list',
         message: 'What would you like to do?',
         name: 'selection',
-        choices: ['View all employees', 'View employees by department', 'View employees by role', 'Add department', 'Add role', 'Add employee', 'Exit'],
+        choices: ['View all employees', 'View employees by department', 'Update employee role', 'View employees by role', 'Add department', 'Add role', 'Add employee', 'Exit'],
     }]).then((data) => {
         let userChoice = data.selection;
 
@@ -33,7 +33,7 @@ function optionTree() {
                 departmentArray.push(res[i].name);
             }
         })
-
+        
         // create list of managers
         let managerArray =["None"];
         connection.query("SELECT * FROM employee", function(err, res) {
@@ -51,6 +51,8 @@ function optionTree() {
                 roleArray.push(res[i].title);
             }
         })
+
+        let roleHolder2 = roleArrayCreator();
 
         // build a case-switch tree that performs a different task for each choice
         // each case should have a function that is used
@@ -72,6 +74,9 @@ function optionTree() {
                 break;
             case 'Add employee':
                 addEmployee(roleArray, managerArray);
+                break;
+            case 'Update employee role':
+                updateRole(roleHolder2);
                 break;
             case 'Exit':
                 break;
@@ -141,7 +146,6 @@ const addRole = (deptArray) => {
             console.log(res[0].id);
             // pass all needed information along
             buildRole(data.roleTitle, data.roleSalary, res[0].id);
-            optionTree();
         })
     })
 }
@@ -157,6 +161,7 @@ const buildRole = (job, pay, departmentID) => {
         function(err, res) {
             if (err) throw err;
             console.log("\nRole added!\n");
+            optionTree();
         }
     )
 }
@@ -312,6 +317,79 @@ const viewAllEmployees = () => {
         console.table(res);
         optionTree();
     });
+}
+
+var roleHolder = [];
+function roleArrayCreator()  {
+    connection.query("SELECT * FROM role", function(err, res) {
+        if (err) throw err;
+        for(var i = 0; i < res.length; i++) {
+            roleHolder.push(res[i].title);
+        }
+    })
+    return roleHolder;
+}
+
+var employeeHolder = [];
+function employeeArrayCreator() {
+    connection.query("SELECT * FROM employee", function(err, res) {
+        if (err) throw err;
+        for(let i = 0; i < res.length; i++) {
+            employeeHolder.push(res[i].first_name + " " + res[i].last_name);
+        }
+    })
+    return employeeHolder;
+}
+
+// create function that allows user to update an employees role
+let updateRole = (roleList) => {
+    // prompt the user for the employee being changed and their new role
+
+    connection.query("SELECT employee.first_name, employee.last_name FROM employee", function(err, res) {
+        if (err) throw err;
+
+        inquirer.prompt([{
+            type: "list",
+            name: "changedEmployee",
+            message: "Which employee would you like to update?",
+            choices: function() {
+                let employees = [];
+                for (let k = 0; k < res.length; k++) {
+                    employees.push(res[k].first_name + " " + res[k].last_name);
+                }
+                return employees;
+            },
+        },
+        {
+            type: 'list',
+            name: 'updatedRole',
+            message: 'What is the new role of the employee?',
+            choices: roleList
+        }])
+    .then((data) => {
+        let splitName = data.changedEmployee.split(" ");
+        let empFirstName = splitName[0];
+        let empLastName = splitName[1];
+        let roleID = roleList.indexOf(data.updatedRole) + 1;
+        updateEmployee(empFirstName, empLastName, roleID);
+    })})
+}
+
+const updateEmployee = (empFirstName, empLastName, positionID) => {
+    connection.query("UPDATE employee SET ? WHERE ? AND ?",  [{
+        role_id: positionID
+    },
+    {
+        first_name: empFirstName
+    },
+    {
+        last_name: empLastName
+    }], 
+    function(err, results) {
+        if (err) throw err
+        console.log("Employee updated!");
+        optionTree();
+    })
 }
 
 optionTree();
