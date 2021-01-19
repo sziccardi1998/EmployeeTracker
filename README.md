@@ -22,7 +22,7 @@ The Employee Tracker Application is a command line application that allows a use
 
 ## Installation
 
-Node.js will need to be installed to use this application. After downloading the application, use the command npm init and npm install to download all of the application dependencies. Additionally a schema will need to be created with the included .sql file.
+Node.js will need to be installed to use this application. After downloading the application, use the command npm init and npm install to download all of the application dependencies. Additionally a schema will need to be created with the included .sql file. The users password to their MySQL account will need to be included in server.js for this application to work.
 
 
 ## Questions
@@ -32,7 +32,7 @@ If you have any questions regarding this application, I can be reached through m
 
 ## Links
 
-A video showing the functionality of the application can be found at 
+A video showing the functionality of the application can be found at https://drive.google.com/file/d/1eyPAzeJv4bUINO3LbXD-hYMfecd6hjIo/view 
 
 ## License
 

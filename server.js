@@ -7,7 +7,7 @@ const connection = mysql.createConnection({
     host: 'localhost',
     port: 3306,
     user: 'root',
-    password: "Jag!ax22", // figure out how to hide this later
+    password: "", // This will need to be added by the user
     database: "employee_DB" 
 });
 
@@ -144,7 +144,6 @@ const addRole = (deptArray) => {
         },
         function(err, res) {
             if (err) throw err;
-            console.log(res[0].id);
             // pass all needed information along
             buildRole(data.roleTitle, data.roleSalary, res[0].id);
         })
@@ -312,7 +311,7 @@ const viewRoles = () => {
 // create function that shows all information for each employee
 const viewAllEmployees = () => {
     // get id, name, title, department, salary, manager
-    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(manager.first_name, ' ', manager.last_name) AS Manager FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id LEFT JOIN employee manager on employee.manager_id = manager.id;",
+    connection.query("SELECT employee.id, employee.first_name, employee.last_name, role.title, role.salary, department.name AS Department, CONCAT(manager.first_name, ' ', manager.last_name) AS Manager FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id LEFT JOIN employee manager on employee.manager_id = manager.id;",
     function(err, res) {
         if (err) throw err;
         console.table(res);
