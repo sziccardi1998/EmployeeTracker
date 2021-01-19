@@ -79,6 +79,7 @@ function optionTree() {
                 updateRole(roleHolder2);
                 break;
             case 'Exit':
+                connection.end();
                 break;
         }
     })
